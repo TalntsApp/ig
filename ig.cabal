@@ -1,5 +1,5 @@
 name:                ig
-version:             0.8
+version:             0.8.1
 synopsis:            Bindings to Instagram's API.
 homepage:            https://github.com/prowdsponsor/ig
 license:             BSD3
@@ -41,24 +41,25 @@ library
     Instagram
 --  other-modules:
   build-depends:
-      base                 >= 4       && < 5
-    , bytestring           >= 0.9     && < 0.11
-    , text                 >= 0.11
-    , transformers         >= 0.2     && < 0.5
-    , transformers-base
-    , monad-control
-    , resourcet
-    , http-types
-    , http-conduit         >= 2.0     && < 2.2
-    , aeson                >= 0.5
-    , time
-    , data-default
-    , lifted-base
-    , unordered-containers
-    , crypto-api           >= 0.11    && < 0.14
-    , cryptohash           >= 0.7
-    , cryptohash-cryptoapi == 0.1.*
-    , base16-bytestring    >= 0.1
+                    base                 >= 4       && < 5
+                , aeson                >= 0.5
+                , base16-bytestring    >= 0.1
+                , bytestring           >= 0.9     && < 0.11
+                , crypto-api           >= 0.11    && < 0.14
+                , cryptohash           >= 0.7
+                , cryptohash-cryptoapi < 0.2
+                , data-default
+                , http-client
+                , http-conduit         >= 2.0     && < 3.0
+                , http-types
+                , lifted-base
+                , monad-control
+                , resourcet
+                , text                 >= 0.11
+                , time
+                , transformers         >= 0.2     && < 0.6
+                , transformers-base
+                , unordered-containers
   if flag(conduit11)
     build-depends:
         conduit              >= 1.1.0.0 && < 1.3

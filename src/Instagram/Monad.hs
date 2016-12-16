@@ -132,7 +132,7 @@ getPostRequest :: (Monad m,HT.QueryLike q) => ByteString -- ^ the url path
   -> InstagramT m H.Request -- ^ the properly configured request
 getPostRequest path query=do
   host<-getHost
-  return $ def {
+  return $ H.defaultRequest {
                      H.secure=True
                      , H.host = host
                      , H.port = 443
@@ -151,7 +151,7 @@ getGetRequest path query=do
 #if DEBUG
   liftIO $ BSC.putStrLn $ BS.append path qs
 #endif
-  return $ def {
+  return $ H.defaultRequest {
                      H.secure=True
                      , H.host = host
                      , H.port = 443
@@ -184,14 +184,13 @@ igReq :: forall b (m :: * -> *) wrappedErr .
                     -> InstagramT m b
 igReq req extractError=do
    -- we check the status ourselves
-  let req' = req { H.checkStatus = \_ _ _ -> Nothing }
   mgr<-getManager
-  res<-H.http req' mgr
+  res<-H.http req{ H.checkResponse = \_ _ -> pure () } mgr
   let status = H.responseStatus res
       headers = H.responseHeaders res
       cookies = H.responseCookieJar res
       ok=isOkay status
-      err=H.StatusCodeException status headers cookies
+      err=H.StatusCodeException (fmap (\_ -> ()) res) "Problem contacting Instagram."
   L.catch (do
 #if DEBUG
 #if CONDUIT11
@@ -217,8 +216,8 @@ igReq req extractError=do
           -- parse response as an error
           case fromJSON value of
             Success ise-> throw $ IGAppException $ extractError ise
-            _ -> throw err -- we can't even parse the error, throw the HTTP error
-    ) (\(_::ParseError)->throw err) -- the error body wasn't even json
+            _ -> throw $ H.HttpExceptionRequest req err -- we can't even parse the error, throw the HTTP error
+    ) (\(_::ParseError)->throw $ H.HttpExceptionRequest req err) -- the error body wasn't even json
 
 -- | get a JSON response from a request to Instagram
 -- instagram returns either a result, or an error
